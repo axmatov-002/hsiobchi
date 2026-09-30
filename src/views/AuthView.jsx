@@ -7,15 +7,11 @@ import {
   User, 
   Phone, 
   School, 
-  ArrowRight, 
-  ShieldCheck, 
-  Briefcase, 
-  GraduationCap,
-  Sparkles
+  ArrowRight 
 } from 'lucide-react';
 
 export default function AuthView() {
-  const { login, register, quickLoginAs } = useAuth();
+  const { login, register } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -91,42 +87,6 @@ export default function AuthView() {
           </p>
         </div>
 
-        {/* Demo Fast Switcher Card */}
-        <div className="glass-card" style={{ padding: '16px 20px', marginBottom: '20px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#818cf8', fontWeight: 700, textTransform: 'uppercase', marginBottom: '10px' }}>
-            <Sparkles size={14} />
-            <span>Bir bosishda sinov hisoblariga kirish:</span>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => quickLoginAs('admin')}
-              style={{ fontSize: '0.78rem', padding: '8px 4px', flexDirection: 'column', gap: '4px' }}
-            >
-              <ShieldCheck size={18} color="#ef4444" />
-              <span>👑 Admin</span>
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => quickLoginAs('manager')}
-              style={{ fontSize: '0.78rem', padding: '8px 4px', flexDirection: 'column', gap: '4px' }}
-            >
-              <Briefcase size={18} color="#8b5cf6" />
-              <span>💼 Menejer</span>
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => quickLoginAs('student')}
-              style={{ fontSize: '0.78rem', padding: '8px 4px', flexDirection: 'column', gap: '4px' }}
-            >
-              <GraduationCap size={18} color="#3b82f6" />
-              <span>🎓 O‘quvchi</span>
-            </button>
-          </div>
-        </div>
 
         {/* Main Auth Card */}
         <div className="glass-panel" style={{ padding: '32px' }}>
