@@ -7,12 +7,14 @@ import {
   User, 
   Phone, 
   School, 
-  ArrowRight 
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck
 } from 'lucide-react';
 
-export default function AuthView() {
+export default function AuthView({ initialIsRegister = false, onBackToLanding }) {
   const { login, register } = useAuth();
-  const [isRegister, setIsRegister] = useState(false);
+  const [isRegister, setIsRegister] = useState(initialIsRegister);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -59,13 +61,33 @@ export default function AuthView() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '24px 16px',
-      background: 'radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.12) 0%, transparent 45%), #090d16'
+      padding: '32px 16px',
+      background: 'radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%), radial-gradient(circle at 80% 80%, rgba(6, 182, 212, 0.12) 0%, transparent 45%), var(--bg-main)',
+      position: 'relative'
     }}>
+      
+      {/* Back to Landing Page button */}
+      {onBackToLanding && (
+        <button
+          onClick={onBackToLanding}
+          className="btn btn-secondary btn-sm"
+          style={{
+            position: 'absolute',
+            top: '24px',
+            left: '24px',
+            gap: '8px',
+            zIndex: 10
+          }}
+        >
+          <ArrowLeft size={16} />
+          <span>Bosh sahifaga qaytish</span>
+        </button>
+      )}
+
       <div style={{ width: '100%', maxWidth: isRegister ? '540px' : '460px' }}>
         
         {/* Brand Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{
             width: '60px',
             height: '60px',
@@ -75,7 +97,7 @@ export default function AuthView() {
             alignItems: 'center',
             justifyContent: 'center',
             boxShadow: '0 8px 24px rgba(99, 102, 241, 0.45)',
-            marginBottom: '16px'
+            marginBottom: '14px'
           }}>
             <Wallet size={32} color="#ffffff" />
           </div>
@@ -87,12 +109,11 @@ export default function AuthView() {
           </p>
         </div>
 
-
         {/* Main Auth Card */}
         <div className="glass-panel" style={{ padding: '32px' }}>
           
           {/* Tab Selector */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', background: 'var(--bg-subtle)', padding: '4px', borderRadius: '12px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', background: 'var(--bg-subtle)', padding: '4px', borderRadius: '12px', marginBottom: '20px' }}>
             <button
               type="button"
               onClick={() => { setIsRegister(false); setError(''); }}
@@ -210,7 +231,7 @@ export default function AuthView() {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label">Oylik xarajat byudjeti (so‘m)</label>
+                    <label className="form-label">Oylik byudjet (so‘m)</label>
                     <input
                       type="number"
                       className="form-input"

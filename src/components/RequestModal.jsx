@@ -30,6 +30,10 @@ export default function RequestModal({ isOpen, onClose, onSuccess }) {
       setError('Iltimos, barcha maydonlarni to‘liq to‘ldiring');
       return;
     }
+    if (numAmount > 1000000000) {
+      setError('Maksimal summa 1,000,000,000 so‘mdan oshmasligi kerak');
+      return;
+    }
 
     setLoading(true);
     try {

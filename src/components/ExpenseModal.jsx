@@ -70,6 +70,10 @@ export default function ExpenseModal({ isOpen, onClose, onSuccess }) {
       setError('Iltimos, haqiqiy summani kiriting');
       return;
     }
+    if (numAmount > 1000000000) {
+      setError('Maksimal summa 1,000,000,000 so‘mdan oshmasligi kerak');
+      return;
+    }
 
     setLoading(true);
     try {

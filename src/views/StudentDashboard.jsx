@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { transactionsApi, goalsApi, commonApi } from '../services/api';
+import { transactionsApi, goalsApi, commonApi, authApi } from '../services/api';
 import { formatMoney, formatDate } from '../utils/formatters';
 import StatsCard from '../components/StatsCard';
 import { CategoryChart, WeeklyChart } from '../components/Charts';
+import DailyBudgetAdvisor from '../components/DailyBudgetAdvisor';
+import CurrencyWidget from '../components/CurrencyWidget';
+import ReceiptModal from '../components/ReceiptModal';
+import TelegramModal from '../components/TelegramModal';
 import { 
   Wallet, 
   TrendingUp, 
@@ -19,7 +23,10 @@ import {
   Zap,
   HelpCircle,
   ShieldCheck,
-  Award
+  Award,
+  Send,
+  Receipt,
+  RotateCcw
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -31,6 +38,10 @@ export default function StudentDashboard({ onOpenNewTransaction, onOpenNewGoal, 
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showGuide, setShowGuide] = useState(false);
+
+  // Modals for realism
+  const [selectedTxForReceipt, setSelectedTxForReceipt] = useState(null);
+  const [isTelegramModalOpen, setIsTelegramModalOpen] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -79,6 +90,18 @@ export default function StudentDashboard({ onOpenNewTransaction, onOpenNewGoal, 
     }
   };
 
+  const handleResetAll = async () => {
+    const confirmReset = window.confirm("Rostdan ham barcha daromad, xarajat va maqsadlarni tozalab, hisobni boshidan (0 dan) boshlamoqchimisiz?");
+    if (!confirmReset) return;
+    try {
+      await authApi.resetData();
+      await fetchData();
+      alert("Barcha hisob-kitoblar tozalandi! Endi kassa daftaringizni 0 dan boshlashingiz mumkin.");
+    } catch (e) {
+      alert(e.message || "Xatolik yuz berdi");
+    }
+  };
+
   // Budget calculations
   const budget = user?.monthlyBudget || summary.monthlyBudget || 1800000;
   const budgetUsedPercent = Math.min(Math.round((summary.totalExpense / budget) * 100), 100);
@@ -122,7 +145,17 @@ export default function StudentDashboard({ onOpenNewTransaction, onOpenNewGoal, 
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => setIsTelegramModalOpen(true)}
+            style={{ gap: '6px', color: '#38bdf8' }}
+            title="Telegram Bot orqali ulanish"
+          >
+            <Send size={15} />
+            <span>@TalabaKassaBot</span>
+          </button>
+
           <button 
             className="btn btn-secondary btn-sm" 
             onClick={() => setShowGuide(!showGuide)}
@@ -131,9 +164,21 @@ export default function StudentDashboard({ onOpenNewTransaction, onOpenNewGoal, 
             <HelpCircle size={15} />
             <span>Qo‘llanma</span>
           </button>
+          
           <button className="btn btn-secondary btn-sm" onClick={onOpenNewRequest}>
             Moddiy So‘rov
           </button>
+          
+          <button 
+            className="btn btn-ghost btn-sm" 
+            onClick={handleResetAll}
+            style={{ gap: '6px', color: 'var(--text-muted)', border: '1px solid rgba(255, 255, 255, 0.12)' }}
+            title="Barcha ma'lumotlarni tozalab, 0 dan boshlash"
+          >
+            <RotateCcw size={14} />
+            <span>Boshidan boshlash</span>
+          </button>
+          
           <button className="btn btn-primary btn-sm" onClick={onOpenNewTransaction} style={{ gap: '6px' }}>
             <PlusCircle size={16} />
             <span>Yangi Qayd</span>
@@ -206,14 +251,14 @@ export default function StudentDashboard({ onOpenNewTransaction, onOpenNewGoal, 
               flexShrink: 0
             }}
           />
-          <div>
+          <div style={{ minWidth: 0, overflow: 'hidden' }}>
             <span style={{ fontSize: '0.78rem', color: '#34d399', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               📈 Tushumlar va Jamg‘arma
             </span>
-            <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#10b981', margin: '2px 0' }}>
-              +{formatMoney(summary.totalIncome)}
+            <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#10b981', margin: '2px 0', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+              {summary.totalIncome > 0 ? '+' : ''}{formatMoney(summary.totalIncome)}
             </div>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, whiteSpace: 'normal' }}>
               Stipendiya, repetitorlik va ota-ona ko‘magi
             </p>
           </div>
@@ -245,192 +290,75 @@ export default function StudentDashboard({ onOpenNewTransaction, onOpenNewGoal, 
               flexShrink: 0
             }}
           />
-          <div>
+          <div style={{ minWidth: 0, overflow: 'hidden' }}>
             <span style={{ fontSize: '0.78rem', color: '#f87171', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               📉 Sarf-Xarajatlar Nazorati
             </span>
-            <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#ef4444', margin: '2px 0' }}>
-              -{formatMoney(summary.totalExpense)}
+            <div style={{ fontSize: '1.45rem', fontWeight: 800, color: '#ef4444', margin: '2px 0', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+              {summary.totalExpense > 0 ? '-' : ''}{formatMoney(summary.totalExpense)}
             </div>
-            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
-              Oziq-ovqat, transport, yotoqxona va boshqalar
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, whiteSpace: 'normal' }}>
+              Ijara, oziq-ovqat, transport va o‘quv qurollari
             </p>
           </div>
         </div>
 
       </div>
 
-      {/* Quick 1-Click Action Chips on Dashboard */}
-      <div className="glass-card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Zap size={18} color="#f59e0b" />
-          <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>Tezkor xarajat kiritish:</span>
-        </div>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button 
-            className="quick-tag" 
-            onClick={() => handleQuickAdd(15000, 'Oziq-ovqat', 'Qahva va yegulik')}
-            title="15,000 so‘m xarajat kiritish"
-          >
-            ☕ Kofe 15k
-          </button>
-          <button 
-            className="quick-tag" 
-            onClick={() => handleQuickAdd(28000, 'Oziq-ovqat', 'Tushlik taom')}
-            title="28,000 so‘m xarajat kiritish"
-          >
-            🍔 Tushlik 28k
-          </button>
-          <button 
-            className="quick-tag" 
-            onClick={() => handleQuickAdd(5000, 'Transport', 'Metro / Avtobus')}
-            title="5,000 so‘m xarajat kiritish"
-          >
-            🚌 Yo‘lkira 5k
-          </button>
-          <button 
-            className="quick-tag" 
-            onClick={() => handleQuickAdd(35000, 'Kitob va O\'quv qurollari', 'Darslik va daftarlar')}
-            title="35,000 so‘m xarajat kiritish"
-          >
-            📚 Kitob 35k
-          </button>
-        </div>
-      </div>
-
-      {/* Budget Warning Banner if over/warning */}
-      {isBudgetOver && (
-        <div className="glass-card" style={{
-          padding: '16px 20px',
-          background: 'rgba(239, 68, 68, 0.18)',
-          border: '1px solid rgba(239, 68, 68, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '14px'
-        }}>
-          <AlertTriangle size={26} color="#ef4444" />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, color: '#f87171', fontSize: '0.98rem' }}>
-              Diqqat! Siz belgilangan oylik byudjet limitidan oshib ketdingiz!
-            </div>
-            <p style={{ margin: '2px 0 0', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-              Oylik limit: {formatMoney(budget)}. Hozirgi xarajat: {formatMoney(summary.totalExpense)} (+{formatMoney(summary.totalExpense - budget)} ortiqcha sarf).
-            </p>
-          </div>
-        </div>
-      )}
-
-      {isBudgetWarning && (
-        <div className="glass-card" style={{
-          padding: '16px 20px',
-          background: 'rgba(245, 158, 11, 0.18)',
-          border: '1px solid rgba(245, 158, 11, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '14px'
-        }}>
-          <AlertTriangle size={26} color="#f59e0b" />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '0.98rem' }}>
-              Ehtiyot bo‘ling! Oylik byudjetingizning {budgetUsedPercent}% qismi sarflandi.
-            </div>
-            <p style={{ margin: '2px 0 0', fontSize: '0.84rem', color: 'var(--text-muted)' }}>
-              Oylik byudjetdan qolgan mablag‘: {formatMoney(Math.max(0, budget - summary.totalExpense))}.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* 4 Stats Cards with 3D Images */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px' }}>
+      {/* KPI Stats Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
         <StatsCard
-          title="Shaxsiy Sof Balans"
+          title="Shaxsiy Balans (Kassa)"
           value={formatMoney(summary.balance)}
-          subtitle={summary.balance >= 0 ? "Kassada yetarli mablag‘ bor" : "Qarzdorlik / limitdan oshish"}
+          subtext={summary.balance >= 0 ? 'Erkin qoldiq mavjud' : 'Kassada kamomad'}
+          type={summary.balance >= 0 ? 'positive' : 'negative'}
           icon={Wallet}
-          color="blue"
         />
 
         <StatsCard
-          title="Jami Tushum (Daromad)"
-          value={formatMoney(summary.totalIncome)}
-          subtitle="Barcha qayd etilgan tushumlar"
-          image3D="/income-3d.jpg"
-          color="emerald"
-        />
-
-        <StatsCard
-          title="Jami Chiqim (Xarajat)"
+          title="Oylik Sarflangan"
           value={formatMoney(summary.totalExpense)}
-          subtitle={`${transactions.filter(t => t.type === 'expense').length} ta to‘lov amalga oshirilgan`}
-          image3D="/expense-3d.jpg"
-          color="rose"
+          subtext={`Byudjetdan sarf: ${budgetUsedPercent}%`}
+          type={isBudgetOver ? 'negative' : (isBudgetWarning ? 'warning' : 'neutral')}
+          icon={TrendingDown}
         />
 
         <StatsCard
-          title="Oylik Byudjet Limit"
-          value={`${budgetUsedPercent}%`}
-          subtitle={`Limit: ${formatMoney(budget)}`}
-          icon={PieChart}
-          color={isBudgetOver ? 'rose' : (isBudgetWarning ? 'amber' : 'purple')}
+          title="Oylik Tushum"
+          value={formatMoney(summary.totalIncome)}
+          subtext="Jami daromadlar miqdori"
+          type="positive"
+          icon={TrendingUp}
+        />
+
+        <StatsCard
+          title="Oylik Byudjet Chegarasi"
+          value={formatMoney(budget)}
+          subtext={isBudgetOver ? 'Limit oshib ketdi!' : `Qolgan: ${formatMoney(Math.max(0, budget - summary.totalExpense))}`}
+          type={isBudgetOver ? 'negative' : 'neutral'}
+          icon={Award}
         />
       </div>
 
-      {/* Budget Progress Bar Card */}
-      <div className="glass-card" style={{ padding: '22px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>Oylik Byudjet Limitining Sarflanishi</span>
-            <span className={`badge ${isBudgetOver ? 'badge-danger' : (isBudgetWarning ? 'badge-warning' : 'badge-success')}`}>
-              {isBudgetOver ? 'Limit oshdi ⚠️' : `${budgetUsedPercent}% sarflandi`}
-            </span>
-          </div>
-          <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-muted)' }}>
-            {formatMoney(summary.totalExpense)} / {formatMoney(budget)}
-          </div>
-        </div>
+      {/* Smart Daily Budget Advisor Widget */}
+      <DailyBudgetAdvisor
+        summary={summary}
+        budget={budget}
+        onQuickAdd={handleQuickAdd}
+      />
 
-        <div style={{ height: '12px', width: '100%', background: 'var(--bg-subtle)', borderRadius: '999px', overflow: 'hidden' }}>
-          <div 
-            style={{ 
-              height: '100%', 
-              width: `${budgetUsedPercent}%`, 
-              background: isBudgetOver 
-                ? 'linear-gradient(90deg, #f59e0b 0%, #ef4444 100%)' 
-                : 'linear-gradient(90deg, #6366f1 0%, #10b981 100%)',
-              borderRadius: '999px',
-              transition: 'width 0.4s ease'
-            }} 
-          />
-        </div>
+      {/* Charts Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+        <CategoryChart transactions={transactions} />
+        <WeeklyChart transactions={transactions} />
       </div>
 
-      {/* Two Analytics Charts Grid */}
+      {/* Currency Exchange & Goals Row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
         
-        {/* Category Breakdown */}
-        <div className="glass-card" style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800 }}>Xarajatlar Toifalar Bo‘yicha</h3>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>Ulush foizida</span>
-          </div>
-          <CategoryChart transactions={transactions} />
-        </div>
+        {/* Currency Widget */}
+        <CurrencyWidget />
 
-        {/* Weekly Trend */}
-        <div className="glass-card" style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800 }}>So‘nggi 7 Kunlik Xarajatlar</h3>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-dim)' }}>Dinamika</span>
-          </div>
-          <WeeklyChart transactions={transactions} />
-        </div>
-
-      </div>
-
-      {/* Goals & Announcements Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
-        
         {/* Savings Goals */}
         <div className="glass-card" style={{ padding: '22px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
@@ -495,50 +423,15 @@ export default function StudentDashboard({ onOpenNewTransaction, onOpenNewGoal, 
           )}
         </div>
 
-        {/* Announcements & Financial Tips */}
-        <div className="glass-card" style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <Bell size={20} color="#f59e0b" />
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800 }}>E‘lonlar va Maslahatlar</h3>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {announcements.map(ann => (
-              <div key={ann.id} style={{
-                padding: '14px',
-                borderRadius: '12px',
-                background: 'var(--bg-subtle)',
-                border: '1px solid var(--border-color)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span className="badge badge-warning" style={{ fontSize: '0.68rem' }}>
-                    {ann.badge || 'E‘lon'}
-                  </span>
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>{formatDate(ann.date)}</span>
-                </div>
-                <h4 style={{ fontSize: '0.9rem', fontWeight: 800, marginBottom: '4px' }}>
-                  {ann.title}
-                </h4>
-                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0 }}>
-                  {ann.content}
-                </p>
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '8px', fontStyle: 'italic' }}>
-                  {ann.author}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
       </div>
 
-      {/* Recent Transactions List with 3D Badges */}
+      {/* Recent Transactions List with Receipt Trigger */}
       <div className="glass-card" style={{ padding: '22px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>So‘nggi Xarajatlar va Daromadlar</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>So‘nggi Xarajatlar & Fiskal Kvitansiyalar</h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', margin: 0 }}>
-              Har bir amaliyot yonida 3D grafik belgilar bilan
+              Har bir amaliyot yonidagi "Chek" tugmasini bosib rasmiy kvitansiyani ko‘ring
             </p>
           </div>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
@@ -565,7 +458,9 @@ export default function StudentDashboard({ onOpenNewTransaction, onOpenNewGoal, 
                     padding: '12px 18px',
                     borderRadius: '14px',
                     background: 'var(--bg-subtle)',
-                    border: '1px solid var(--border-color)'
+                    border: '1px solid var(--border-color)',
+                    flexWrap: 'wrap',
+                    gap: '12px'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
@@ -593,17 +488,29 @@ export default function StudentDashboard({ onOpenNewTransaction, onOpenNewGoal, 
                     </div>
                   </div>
 
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{
-                      fontWeight: 800,
-                      fontSize: '1rem',
-                      color: isIncome ? '#10b981' : '#ef4444'
-                    }}>
-                      {isIncome ? '+' : '-'}{formatMoney(tx.amount)}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{
+                        fontWeight: 800,
+                        fontSize: '1rem',
+                        color: isIncome ? '#10b981' : '#ef4444'
+                      }}>
+                        {isIncome ? '+' : '-'}{formatMoney(tx.amount)}
+                      </div>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+                        {tx.method}
+                      </span>
                     </div>
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-                      {tx.method}
-                    </span>
+
+                    <button
+                      onClick={() => setSelectedTxForReceipt(tx)}
+                      className="btn btn-secondary btn-sm"
+                      style={{ padding: '6px 12px', fontSize: '0.78rem', gap: '4px' }}
+                      title="Elektron fiskal kvitansiyani ko'rish"
+                    >
+                      <Receipt size={14} color="#818cf8" />
+                      <span>Chek</span>
+                    </button>
                   </div>
                 </div>
               );
@@ -611,6 +518,21 @@ export default function StudentDashboard({ onOpenNewTransaction, onOpenNewGoal, 
           </div>
         )}
       </div>
+
+      {/* Realistic Fiscal Receipt Modal */}
+      <ReceiptModal
+        isOpen={Boolean(selectedTxForReceipt)}
+        onClose={() => setSelectedTxForReceipt(null)}
+        transaction={selectedTxForReceipt}
+        user={user}
+      />
+
+      {/* Telegram Modal */}
+      <TelegramModal
+        isOpen={isTelegramModalOpen}
+        onClose={() => setIsTelegramModalOpen(false)}
+        user={user}
+      />
 
     </div>
   );

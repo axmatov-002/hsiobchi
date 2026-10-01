@@ -43,6 +43,7 @@ export const authApi = {
   register: (userData) => apiRequest('/auth/register', 'POST', userData),
   getMe: () => apiRequest('/auth/me'),
   updateProfile: (profileData) => apiRequest('/auth/profile', 'PUT', profileData),
+  resetData: () => apiRequest('/auth/reset-data', 'POST'),
 };
 
 // Transactions API

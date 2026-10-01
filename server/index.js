@@ -549,6 +549,21 @@ app.put('/api/auth/profile', authMiddleware, (req, res) => {
   }
 });
 
+// Reset user's personal data (start fresh from 0)
+app.post('/api/auth/reset-data', authMiddleware, (req, res) => {
+  try {
+    const db = readDB();
+    const userId = req.user.id;
+    db.transactions = db.transactions.filter(t => t.userId !== userId);
+    db.requests = db.requests.filter(r => r.userId !== userId);
+    db.goals = db.goals.filter(g => g.userId !== userId);
+    writeDB(db);
+    return res.json({ success: true, message: 'Barcha ma\'lumotlar muvaffaqiyatli tozalandi. 0 dan boshlashingiz mumkin!' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Server xatosi' });
+  }
+});
+
 // ======================== TRANSACTIONS (EXPENSES & INCOMES) ========================
 
 // Get user transactions (or all if admin/manager viewing a student)
@@ -614,6 +629,9 @@ app.post('/api/transactions', authMiddleware, (req, res) => {
     const numAmount = Number(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
       return res.status(400).json({ success: false, message: 'Summa musbat son bo\'lishi shart' });
+    }
+    if (numAmount > 1000000000) {
+      return res.status(400).json({ success: false, message: 'Summa juda katta (maksimal 1,000,000,000 so‘m)' });
     }
 
     const db = readDB();
@@ -758,6 +776,14 @@ app.post('/api/requests', authMiddleware, (req, res) => {
       return res.status(400).json({ success: false, message: 'Ariza nomi, summa va asos kiritilishi shart' });
     }
 
+    const numAmount = Number(amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      return res.status(400).json({ success: false, message: 'Summa musbat son bo\'lishi shart' });
+    }
+    if (numAmount > 1000000000) {
+      return res.status(400).json({ success: false, message: 'Summa juda katta (maksimal 1,000,000,000 so‘m)' });
+    }
+
     const db = readDB();
     const newReq = {
       id: 'req_' + Date.now(),
@@ -765,7 +791,7 @@ app.post('/api/requests', authMiddleware, (req, res) => {
       userName: req.user.name,
       institution: req.user.institution || 'Ta\'lim muassasasi',
       title: title.trim(),
-      amount: Number(amount),
+      amount: numAmount,
       category: category || 'Moddiy yordam',
       reason: reason.trim(),
       status: 'pending',

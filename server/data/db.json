@@ -83,185 +83,23 @@
       "monthlyBudget": 200000,
       "avatarColor": "from-amber-500 to-orange-600",
       "createdAt": "2026-09-30T15:33:08.870Z"
+    },
+    {
+      "id": "usr_1790800640540",
+      "name": "Orifjon",
+      "email": "orifjon2@gmail.com",
+      "passwordHash": "$2b$10$pCRcX5y2mVMOg9m5rcqpXur.hR./dy/3e0RI4XbIXZAGJJ5UFjtjC",
+      "role": "manager",
+      "phone": "+998935846353",
+      "institution": "maktab",
+      "faculty": "7-sinf",
+      "status": "active",
+      "monthlyBudget": 1800000,
+      "avatarColor": "from-blue-500 to-indigo-600",
+      "createdAt": "2026-09-30T20:37:20.691Z"
     }
   ],
   "transactions": [
-    {
-      "id": "tx_1790784629153",
-      "userId": "usr_1790782388703",
-      "type": "income",
-      "amount": 1200000,
-      "category": "Stipendiya",
-      "method": "UzCard",
-      "description": "Universitet stipendiyasi",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:29.153Z"
-    },
-    {
-      "id": "tx_1790784606413",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:06.413Z"
-    },
-    {
-      "id": "tx_1790784606220",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:06.220Z"
-    },
-    {
-      "id": "tx_1790784606015",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:06.015Z"
-    },
-    {
-      "id": "tx_1790784605831",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:05.831Z"
-    },
-    {
-      "id": "tx_1790784605642",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:05.642Z"
-    },
-    {
-      "id": "tx_1790784605433",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:05.433Z"
-    },
-    {
-      "id": "tx_1790784605208",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:05.208Z"
-    },
-    {
-      "id": "tx_1790784605019",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:05.019Z"
-    },
-    {
-      "id": "tx_1790784604814",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:04.814Z"
-    },
-    {
-      "id": "tx_1790784604617",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:04.617Z"
-    },
-    {
-      "id": "tx_1790784604402",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:04.402Z"
-    },
-    {
-      "id": "tx_1790784604158",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:04.158Z"
-    },
-    {
-      "id": "tx_1790784602140",
-      "userId": "usr_1790782388703",
-      "type": "expense",
-      "amount": 15000,
-      "category": "Oziq-ovqat",
-      "method": "UzCard",
-      "description": "Qahva va yegulik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T16:10:02.140Z"
-    },
-    {
-      "id": "tx_1790782611354",
-      "userId": "usr_1790782388703",
-      "type": "income",
-      "amount": 100000,
-      "category": "Ota-onadan jo'natma",
-      "method": "Naqd pul",
-      "description": "",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T15:36:51.354Z"
-    },
-    {
-      "id": "tx_1790782485484",
-      "userId": "usr_1790782388703",
-      "type": "income",
-      "amount": 20000,
-      "category": "Ota-onadan jo'natma",
-      "method": "Naqd pul",
-      "description": "kunlik",
-      "date": "2026-09-30",
-      "createdAt": "2026-09-30T15:34:45.484Z"
-    },
     {
       "id": "tx_1",
       "userId": "usr_std_1",
@@ -450,16 +288,6 @@
       "category": "Sayohat",
       "icon": "Compass",
       "color": "purple"
-    },
-    {
-      "id": "goal_1790784100610",
-      "userId": "usr_1790782388703",
-      "title": "Klaviatura uchun",
-      "targetAmount": 150000,
-      "currentAmount": 20000,
-      "deadline": "2026-11-20",
-      "category": "Jamg‘arma",
-      "color": "blue"
     }
   ],
   "requests": [
