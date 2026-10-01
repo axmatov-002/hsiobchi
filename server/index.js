@@ -16,8 +16,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'talaba_kassa_super_secret_jwt_key_
 app.use(cors());
 app.use(express.json());
 
-// Database path
-const DATA_DIR = path.join(__dirname, 'data');
+// Database path (support Vercel serverless /tmp environment)
+const isVercel = process.env.VERCEL === '1' || Boolean(process.env.VERCEL);
+const DATA_DIR = isVercel ? '/tmp' : path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
 // Ensure data directory exists
@@ -361,6 +362,18 @@ const initialData = {
 // Database helper
 function readDB() {
   if (!fs.existsSync(DB_FILE)) {
+    if (isVercel) {
+      const bundledDb = path.join(__dirname, 'data', 'db.json');
+      if (fs.existsSync(bundledDb)) {
+        try {
+          fs.copyFileSync(bundledDb, DB_FILE);
+          const raw = fs.readFileSync(DB_FILE, 'utf-8');
+          return JSON.parse(raw);
+        } catch (e) {
+          // fallback to initialData
+        }
+      }
+    }
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), 'utf-8');
     return initialData;
   }
@@ -1026,10 +1039,13 @@ app.post('/api/announcements', authMiddleware, requireRole('admin', 'manager'), 
   res.status(201).json({ success: true, message: 'E\'lon e\'lon qilindi', data: newAnn });
 });
 
-// Start server
-const server = app.listen(PORT, () => {
-  console.log(`TalabaKassa Backend API server running on http://localhost:${PORT}`);
-});
+// Start server locally (when not running as a Vercel serverless function)
+if (!isVercel) {
+  app.listen(PORT, () => {
+    console.log(`TalabaKassa Backend API server running on http://localhost:${PORT}`);
+  });
+  // Keep Node.js process alive for Node 26 event loop
+  setInterval(() => {}, 1000 * 60 * 60);
+}
 
-// Keep Node.js process alive for Node 26 event loop
-setInterval(() => {}, 1000 * 60 * 60);
+export default app;
